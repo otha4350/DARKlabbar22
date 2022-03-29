@@ -188,6 +188,59 @@ end_for_reverse_string:
 
 	jr $ra
 
+
+##############################################################################
+#
+#	DESCRIPTION: Makes a string CamelCase
+#
+#	    INPUT: $a0 - address to the start of a NULL-terminated string
+#
+##############################################################################
+camel_case:
+	addi $sp, $sp, -8					# PUSH return address to caller
+	sw	$ra, 4($sp) 					# save return address
+	sw  $a0 0($sp) 						# save input address
+	
+	la $a1 to_upper 					# load to_upper into $a1
+	jal string_for_each 				# string_for_each(str, to_upper)
+
+	lw $a0 0($sp) 						# load return address from stack
+	addi $sp $sp 4						# resets stack pointer
+
+	add $t0 $zero $zero 				# initialize i to 0
+
+for_camel_case:
+	add $t1 $t0 $a0 					# $t1 = address to current letter 
+	lb $t2 0($t1)   					# $t2 = current letter
+
+	beq $t2 $zero end_camel_case		# if current letter = 0 then done
+
+	andi $t3 $t0 0x01 					# $t3 = least significant digit of i
+
+	addi $t0 $t0 1 						# increment i
+
+	beq $t3 $zero for_camel_case 		# if (old) i is even then go to next letter
+
+	addi $t3 $zero 0x41 				# initialize t3 to 0x41 (ascii 'A')
+	blt	$t2, $t3, for_camel_case		# if letter < 'A' then next letter
+
+	addi $t3 $zero 0x5A 				# initialize $t3 0x5A (ascii 'Z')
+	bgt  $t2, $t3, for_camel_case 		# if letter > 'Z' then next letter
+	
+
+	addi $t2 $t2 0x20 					# to lowercase
+
+	sb $t2 0($t1) 						# save new lowercase letter to memory
+
+	j for_camel_case
+
+end_camel_case:
+	lw	$ra, 0($sp)						# Pop return address to caller
+	addi $sp, $sp, 4					# resets stack pointer
+
+	jr $ra
+
+
 ##############################################################################
 #
 # Strings used by main:
@@ -214,6 +267,9 @@ STR_for_each_to_upper:
 
 STR_string_reverse:
 	.asciiz "\n\nstring_reverse(str)\n\n"
+
+STR_string_camelcase:
+	.asciiz "\n\nstring_camelcase(str)\n\n"
 
 	.text
 	.globl main
@@ -314,6 +370,21 @@ main:
 
 	la $a0 STR_str
 	jal print_test_string
+
+	##
+	### string_reverse(str)
+	##
+
+	li	$v0, 4
+	la	$a0, STR_string_camelcase
+	syscall
+
+	la $a0 STR_str
+	jal camel_case
+
+	la $a0 STR_str
+	jal print_test_string
+
 
 	lw	$ra, 0($sp)	# POP return address
 	addi	$sp, $sp, 4	
