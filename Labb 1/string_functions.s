@@ -1,12 +1,10 @@
 ##############################################################################
 #
-#  KURS: 1DT038 2018.  Computer Architecture
+#  KURS: 1DT093 2022.  Computer Architecture
 #	
-# DATUM:
+#  DATUM: 2022-03-29
 #
-#  NAMN:			
-#
-#  NAMN:
+#  NAMN: Otto Hammar, Marta Björknäs, Ebba Hallén
 #
 ##############################################################################
 
@@ -17,7 +15,7 @@ ARRAY_SIZE:
 FIBONACCI_ARRAY:
 	.word	1, 1, 2, 3, 5, 8, 13, 21, 34, 55
 STR_str:
-	.asciiz "abcd"
+	.asciiz "Hunden, Katten, Glassen"
 	#.asciiz ""
 
 	.globl DBG
@@ -39,23 +37,21 @@ integer_array_sum:
 DBG:	##### DEBUGG BREAKPOINT ######
 
         addi    $v0, $zero, 0           # Initialize Sum to zero.
-	add	$t0, $zero, $zero	# Initialize array index i to zero.
+	add	$t0, $zero, $zero				# Initialize array index i to zero.
 	
 for_all_in_array:
 
-	#### Append a MIPS-instruktion before each of these comments
-	
-	beq $t0, $a1, end_for_all# Done if i == N
-	sll	$t1, $t0, 2  # 4*i
-	add $t1, $a0, $t1# address = ARRAY + 4*i
-	lw	$t1, 0($t1)	# n = A[i]
-    add $v0 $v0 $t1   	# Sum = Sum + n
-    addi $t0 $t0 1    # i++ 
-  	j for_all_in_array# next element
+	beq $t0, $a1, end_for_all	# Done if i == N
+	sll	$t1, $t0, 2  			# 4*i
+	add $t1, $a0, $t1			# address = ARRAY + 4*i
+	lw	$t1, 0($t1)				# n = A[i]
+    add $v0 $v0 $t1   			# Sum = Sum + n
+    addi $t0 $t0 1    			# i++ 
+  	j for_all_in_array			# next element
 	
 end_for_all:
 	
-	jr	$ra			# Return to caller.
+	jr	$ra						# Return to caller.
 	
 ##############################################################################
 #
@@ -70,15 +66,15 @@ end_for_all:
 ##############################################################################	
 string_length:
 
-	#### Write your solution here ####
-	add $v0 $zero $zero #initialize i to 0
+	add $v0 $zero $zero 				# initialize i to 0
 
 for_string_length:
-	lb $t1 0($a0) #load letter to t1
-	beq $zero $t1 end_string_length #if letter = 0 then done
-	addi $v0 $v0 1 #increment index by 1
-	addi $a0 $a0 1 #increment address by 1 byte
-	j for_string_length #next letter
+	lb $t1 0($a0) 						# load letter to t1
+	beq $zero $t1 end_string_length 	# if letter = 0 then done
+	addi $v0 $v0 1 						# increment index by 1	
+	addi $a0 $a0 1 						# increment address by 1 byte
+	
+	j for_string_length 				# next letter	
 
 end_string_length:
 	jr	$ra
@@ -98,28 +94,26 @@ end_string_length:
 ##############################################################################	
 string_for_each:
 
-	addi	$sp, $sp, -4		# PUSH return address to caller
-	sw	$ra, 0($sp)
+	addi	$sp, $sp, -4				# PUSH return address to caller
+	sw	$ra, 0($sp)						
 
-	#### Write your solution here ####
 for_string_for_each:
-	lb $t1 0($a0) #load letter to t1
-	beq $zero $t1 end_string_for_each #if letter = 0 then done
+	lb $t1 0($a0) 						# load letter to t1
+	beq $zero $t1 end_string_for_each 	# if letter = 0 then done
 
-	addi	$sp, $sp, -4		# PUSH a0 address to stack
+	addi	$sp, $sp, -4				# PUSH input address to stack
 	sw	$a0, 0($sp)
-	jal $a1			# jump  and save position to $ra
-	lw	$a0, 0($sp)		# Pop a0 
-	addi	$sp, $sp, 4		
+	jal $a1								# jump to input subroutine and save position to $ra
+	lw	$a0, 0($sp)						# Pop input
+	addi	$sp, $sp, 4					# Reset stack pointer
 
-	addi $a0 $a0 1 #increment address by 1 byte
-	j for_string_for_each #next letter
-
+	addi $a0 $a0 1 						# increment address by 1 byte
+	j for_string_for_each 				# next letter
 
 end_string_for_each:
 
-	lw	$ra, 0($sp)		# Pop return address to caller
-	addi	$sp, $sp, 4		
+	lw	$ra, 0($sp)						# Pop return address to caller
+	addi	$sp, $sp, 4					
 
 	jr	$ra
 
@@ -133,60 +127,64 @@ end_string_for_each:
 to_upper:
 
 	#### Write your solution here ####
-    lb $t0 0($a0) #load letter to t0
-	addi $t1 $zero 0x61 #initialize t1 to 0x61 (ascii 'a')
-	blt		$t0, $t1, exit_to_upper	# if letter < 'a' then exit
-	addi	$t0, $t0, -0x20			# $t0 = letter but uppercase
+    lb $t0 0($a0) 						# load letter to t0
+	addi $t1 $zero 0x61 				# initialize t1 to 0x61 (ascii 'a')
+	blt		$t0, $t1, exit_to_upper		# if letter < 'a' then exit
 
+	addi $t1 $zero 0x7A 				# initialize $t1 0x7A (ascii 'z')
+	bgt  $t0, $t1, exit_to_upper 		# if letter > 'z' then exit
+	
+	addi $t0, $t0, -0x20				# $t0 = letter but uppercase
+
+	sb $t0 0($a0) 						#save new letter
 	
 exit_to_upper:
 	jr	$ra
 
 #####################################################################
 #
-#	DESCRIPTION: Reverses a string
+#	DESCRIPTION: Reverses a string in memory
 #
 #		INPUT: $a0 - Address to a NUL-terminated string
 #
-
 #####################################################################
 
 reverse_string:
-	addi	$sp, $sp, -8		# PUSH return address to caller
-	sw	$ra, 4($sp) #save return address
-	sw  $a0 0($sp) #save a0
+	addi $sp, $sp, -8					# PUSH return address to caller
+	sw	$ra, 4($sp) 					# save return address
+	sw  $a0 0($sp) 						# save input address
 	
-	jal string_length
-	add $a1 $v0 $zero
+	jal string_length  					# get the length of the input string
+	add $a1 $v0 $zero  					# save length to $a1
 
-	lw $a0 0($sp)
-	addi $sp $sp 4
+	lw $a0 0($sp) 						# load return address from stack
+	addi $sp $sp 4						# resets stack pointer
 
-	add $t0 $zero $zero
+	add $t0 $zero $zero 				# initialize i to 0
 
 for_reverse_string:
-	sub $t1 $a1 $t0 #t1 = length - i 
-	addi $t1 $t1 -1
-	blt $t1 $t0 end_for_reverse_string #if (length - i) < i then done
+	sub $t1 $a1 $t0 					# t1 = length - i - 1 
+	addi $t1 $t1 -1						
+	blt $t1 $t0 end_for_reverse_string 	# if (length - i - 1) < i then done (we're past halfway through the string)
 	
 
-	add $t2 $a0 $t0 #t2 = address to first char
-	add $t3 $a0 $t1 #t3 = address to second char
+	add $t2 $a0 $t0 					# t2 = address to first char 
+	add $t3 $a0 $t1 					# t3 = address to second char
 	
-	lb	$t4, 0($t2) #t4 = first char
-	lb  $t5, 0($t3) #t5 = second char
+	lb	$t4, 0($t2)						# t4 = first char
+	lb  $t5, 0($t3)						# t5 = second char
 
-	sb		$t4, 0($t3) #save first char to second char's address 
-	sb		$t5, 0($t2)	#save second char to first char's address 
+	sb		$t4, 0($t3) 				# save first char to second char's address 
+	sb		$t5, 0($t2)					# save second char to first char's address 
 	
-	addi $t0 $t0 1
+	addi $t0 $t0 1 						# increment i	
 
-	j for_reverse_string
+	j for_reverse_string 				# next letter 
 
 end_for_reverse_string:
 
-	lw	$ra, 0($sp)		# Pop return address to caller
-	addi	$sp, $sp, 4	
+	lw	$ra, 0($sp)						# Pop return address to caller
+	addi $sp, $sp, 4					# resets stack pointer
 
 	jr $ra
 
